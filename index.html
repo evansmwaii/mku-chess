@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MKU CHESS TOURNAMENT</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --black: #0a0a0a;
+      --white: #f5f0e8;
+      --gold: #f5c518;
+      --orange: #ff6b2b;
+      --green: #1db954;
+      --red: #e63946;
+      --blue: #00b4d8;
+      --purple: #9b5de5;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background-color: var(--black);
+      color: var(--white);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── CHESSBOARD BACKGROUND ── */
+    .chess-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      grid-template-rows: repeat(8, 1fr);
+      opacity: 0.06;
+      pointer-events: none;
+    }
+    .chess-bg div:nth-child(odd) { background: var(--white); }
+    .chess-bg div:nth-child(even) { background: transparent; }
+
+    /* ── FLOATING PIECES ── */
+    .floaters {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .piece {
+      position: absolute;
+      font-size: 2.5rem;
+      opacity: 0.12;
+      animation: drift linear infinite;
+    }
+    @keyframes drift {
+      0%   { transform: translateY(110vh) rotate(0deg);   opacity: 0; }
+      10%  { opacity: 0.14; }
+      90%  { opacity: 0.14; }
+      100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* ── WRAPPER ── */
+    .wrapper {
+      position: relative;
+      z-index: 10;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 4rem;
+    }
+
+    /* ── HEADER ── */
+    header {
+      text-align: center;
+      margin-bottom: 2.8rem;
+    }
+
+    .crown {
+      font-size: 3.5rem;
+      display: block;
+      margin-bottom: 0.2rem;
+      filter: drop-shadow(0 0 18px var(--gold));
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.08); }
+    }
+
+    h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3rem, 10vw, 5.5rem);
+      letter-spacing: 0.04em;
+      line-height: 0.95;
+      background: linear-gradient(135deg, var(--gold) 0%, var(--orange) 50%, var(--red) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+      filter: drop-shadow(0 4px 24px rgba(245,197,24,0.35));
+    }
+
+    .subtitle-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      margin-top: 1.1rem;
+      flex-wrap: wrap;
+    }
+    .badge {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.28rem 0.9rem;
+      border-radius: 999px;
+    }
+    .badge-date  { background: var(--blue);   color: var(--black); }
+    .badge-venue { background: var(--purple);  color: var(--white); }
+
+    /* ── INFO CARDS ── */
+    .info-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+    .card {
+      background: linear-gradient(145deg, #161616, #1e1e1e);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 18px;
+      padding: 1.4rem 1.2rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s, border-color 0.25s;
+    }
+    .card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.18); }
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      opacity: 0.12;
+    }
+    .card-date::before  { background: linear-gradient(135deg, var(--blue), transparent); }
+    .card-prize::before { background: linear-gradient(135deg, var(--gold), transparent); }
+
+    .card-icon { font-size: 2rem; margin-bottom: 0.5rem; display: block; }
+    .card-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      opacity: 0.5;
+      margin-bottom: 0.3rem;
+    }
+    .card-value {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.7rem;
+      letter-spacing: 0.06em;
+      line-height: 1.1;
+    }
+    .card-date .card-value  { color: var(--blue); }
+    .card-prize .card-value { color: var(--gold); }
+    .card-sub {
+      font-size: 0.75rem;
+      opacity: 0.55;
+      margin-top: 0.35rem;
+      line-height: 1.5;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .divider span {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.1rem;
+      letter-spacing: 0.2em;
+      color: var(--orange);
+      white-space: nowrap;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--orange), transparent);
+    }
+
+    /* ── FORM ── */
+    .form-card {
+      background: linear-gradient(160deg, #111 0%, #191919 100%);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 2.2rem 2rem;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03);
+    }
+
+    .field { margin-bottom: 1.4rem; }
+
+    label {
+      display: block;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      opacity: 0.65;
+    }
+    label span { color: var(--orange); margin-right: 0.4rem; }
+
+    input {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      color: var(--white);
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      padding: 0.85rem 1.1rem;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    }
+    input::placeholder { opacity: 0.3; font-size: 0.9rem; }
+    input:focus {
+      border-color: var(--gold);
+      background: rgba(245,197,24,0.05);
+      box-shadow: 0 0 0 3px rgba(245,197,24,0.12);
+    }
+
+    /* deposit field */
+    .deposit-wrapper { position: relative; }
+    .deposit-wrapper input { padding-left: 3.2rem; font-weight: 700; font-size: 1.1rem; }
+    .deposit-prefix {
+      position: absolute;
+      left: 1.1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--green);
+      font-weight: 700;
+      pointer-events: none;
+    }
+    .deposit-wrapper input { color: var(--green); }
+
+    /* CTA button */
+    .cta-btn {
+      width: 100%;
+      margin-top: 0.6rem;
+      padding: 1.05rem;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--green) 0%, #16a34a 100%);
+      color: #fff;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.35rem;
+      letter-spacing: 0.14em;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.18s, box-shadow 0.18s;
+      box-shadow: 0 8px 30px rgba(29,185,84,0.35);
+    }
+    .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 40px rgba(29,185,84,0.5);
+    }
+    .cta-btn:active { transform: translateY(1px); }
+    .cta-btn .mpesa-logo { font-size: 1rem; margin-right: 0.5rem; }
+
+    /* loading state */
+    .cta-btn.loading { pointer-events: none; opacity: 0.7; }
+    .cta-btn.loading::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      animation: shimmer 1.2s infinite;
+    }
+    @keyframes shimmer {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* ── STATUS MESSAGE ── */
+    .status {
+      margin-top: 1.2rem;
+      padding: 0.9rem 1.1rem;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      text-align: center;
+      display: none;
+      font-family: 'Space Mono', monospace;
+    }
+    .status.success { background: rgba(29,185,84,0.15); border: 1px solid var(--green); color: var(--green); }
+    .status.error   { background: rgba(230,57,70,0.15);  border: 1px solid var(--red);   color: var(--red);   }
+    .status.pending { background: rgba(0,180,216,0.15);  border: 1px solid var(--blue);  color: var(--blue);  }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      margin-top: 2.8rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      opacity: 0.3;
+      text-transform: uppercase;
+    }
+    footer span { color: var(--gold); }
+  </style>
+</head>
+<body>
+
+  <div class="chess-bg" id="chessBg"></div>
+
+  <div class="floaters" id="floaters"></div>
+
+  <div class="wrapper">
+
+    <header>
+      <span class="crown">♛</span>
+      <h1>MKU CHESS<br>TOURNAMENT</h1>
+      <div class="subtitle-bar">
+        <span class="badge badge-date">📅 June 14, 2025</span>
+        <span class="badge badge-venue">🏫 MKU Campus</span>
+      </div>
+    </header>
+
+    <div class="info-strip">
+      <div class="card card-date">
+        <span class="card-icon">⏰</span>
+        <div class="card-label">Tournament Date</div>
+        <div class="card-value">June<br>14th</div>
+        <div class="card-sub">Mark your calendar — the board awaits.</div>
+      </div>
+      <div class="card card-prize">
+        <span class="card-icon">🏆</span>
+        <div class="card-label">Prizes</div>
+        <div class="card-value">1st &amp;<br>2nd Place</div>
+        <div class="card-sub">Prize pool grows with every player who registers!</div>
+      </div>
+    </div>
+
+    <div class="divider"><span>Register Now</span></div>
+
+    <div class="form-card">
+      <div class="field">
+        <label><span>01</span> Full Name</label>
+        <input type="text" id="playerName" placeholder="e.g. John Mwangi" autocomplete="name"/>
+      </div>
+
+      <div class="field">
+        <label><span>02</span> M-Pesa Number</label>
+        <input type="tel" id="mpesaNumber" placeholder="e.g. 0712 345 678" maxlength="13" inputmode="numeric"/>
+      </div>
+
+      <div class="field">
+        <label><span>03</span> Registration Fee</label>
+        <div class="deposit-wrapper">
+          <span class="deposit-prefix">KSH</span>
+          <input type="number" id="depositAmount" value="100" min="100" readonly/>
+        </div>
+      </div>
+
+      <button class="cta-btn" id="payBtn" onclick="triggerSTK()">
+        <span class="mpesa-logo">📲</span> DEPOSIT 100 VIA M-PESA
+      </button>
+
+      <div class="status" id="statusMsg"></div>
+    </div>
+
+    <footer>
+      MKU Chess Club &nbsp;·&nbsp; <span>♟ May the best mind win ♟</span>
+    </footer>
+  </div>
+
+  <script>
+    /* ── Chessboard squares ── */
+    const bg = document.getElementById('chessBg');
+    for (let i = 0; i < 64; i++) bg.appendChild(document.createElement('div'));
+
+    /* ── Floating pieces ── */
+    const pieces = ['♙','♟','♖','♜','♘','♞','♗','♝','♕','♛','♔','♚'];
+    const colors = ['#f5c518','#ff6b2b','#00b4d8','#9b5de5','#1db954','#e63946'];
+    const container = document.getElementById('floaters');
+    for (let i = 0; i < 18; i++) {
+      const el = document.createElement('div');
+      el.className = 'piece';
+      el.textContent = pieces[Math.floor(Math.random() * pieces.length)];
+      el.style.left  = Math.random() * 100 + 'vw';
+      el.style.color = colors[Math.floor(Math.random() * colors.length)];
+      const dur = 12 + Math.random() * 18;
+      const delay = -Math.random() * dur;
+      el.style.animation = `drift ${dur}s ${delay}s linear infinite`;
+      container.appendChild(el);
+    }
+
+    /* ── M-Pesa STK Push trigger ── */
+    async function triggerSTK() {
+      const name   = document.getElementById('playerName').value.trim();
+      const phone  = document.getElementById('mpesaNumber').value.trim().replace(/\s/g, '');
+      const amount = document.getElementById('depositAmount').value;
+      const btn    = document.getElementById('payBtn');
+      const status = document.getElementById('statusMsg');
+
+      // Basic validation
+      if (!name) { showStatus('error', '⚠️ Please enter your full name.'); return; }
+      if (!phone || phone.length < 10) { showStatus('error', '⚠️ Enter a valid M-Pesa number.'); return; }
+
+      btn.classList.add('loading');
+      btn.textContent = 'SENDING STK PUSH...';
+      showStatus('pending', '📲 Check your phone — M-Pesa prompt incoming…');
+
+      try {
+        const res = await fetch('/api/stkpush', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, phone, amount: parseInt(amount) })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          showStatus('success', '✅ STK push sent! Enter your M-Pesa PIN to complete registration.');
+          btn.textContent = '✓ REQUEST SENT';
+        } else {
+          throw new Error(data.message || 'Payment initiation failed.');
+        }
+      } catch (err) {
+        showStatus('error', `❌ ${err.message}`);
+        btn.classList.remove('loading');
+        btn.innerHTML = '<span class="mpesa-logo">📲</span> DEPOSIT 100 VIA M-PESA';
+      }
+    }
+
+    function showStatus(type, msg) {
+      const el = document.getElementById('statusMsg');
+      el.className = `status ${type}`;
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

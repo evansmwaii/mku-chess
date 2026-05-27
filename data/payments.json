@@ -1,0 +1,20 @@
+[
+  {
+    "checkoutRequestId": "ws_CO_27052026180321171724862896",
+    "name": "evans mwai",
+    "phone": "254724862896",
+    "amount": 100,
+    "status": "PENDING",
+    "createdAt": "2026-05-27T15:03:21.437Z",
+    "updatedAt": "2026-05-27T15:03:21.437Z"
+  },
+  {
+    "checkoutRequestId": "ws_CO_27052026180423921114086015",
+    "name": "steve",
+    "phone": "254114086015",
+    "amount": 100,
+    "status": "PENDING",
+    "createdAt": "2026-05-27T15:04:24.262Z",
+    "updatedAt": "2026-05-27T15:04:24.262Z"
+  }
+]
