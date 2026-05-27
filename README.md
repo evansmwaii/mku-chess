@@ -128,3 +128,4 @@ Use these Safaricom sandbox test credentials when prompted for a PIN:
 1. Change the Daraja URLs in `utils/auth.js` and `routes/stk.js` from `sandbox.safaricom.co.ke` → `api.safaricom.co.ke`
 2. Replace sandbox `SHORTCODE` and `PASSKEY` with your production ones
 3. Make sure `CALLBACK_URL` points to your real server (not ngrok)
+# mku-chess
