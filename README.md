@@ -129,3 +129,4 @@ Use these Safaricom sandbox test credentials when prompted for a PIN:
 2. Replace sandbox `SHORTCODE` and `PASSKEY` with your production ones
 3. Make sure `CALLBACK_URL` points to your real server (not ngrok)
 # mku-chess
+# mku-chess
